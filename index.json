@@ -1,0 +1,150 @@
+{
+  "$jason": {
+    "head": {
+      "title": "Dark Twitter",
+      "icon": "https://d30y9cdsu7xlg0.cloudfront.net/png/20940-200.png",
+      "description": "Dark Theme Minimal Twitter",
+      "website": {
+        "text": "Click here to learn how to add keys",
+        "url": "http://www.openjason.org/help/"
+      },
+      "actions": {
+        "$pull": {
+          "trigger": "reload"
+        },
+        "$load": {
+          "trigger": "reload"
+        },
+        "reload": {
+          "trigger": "twitter"
+        },
+        "twitter": {
+          "type": "$oauth.request",
+          "options": {
+            "version": "0",
+            "path": "/1.1/statuses/home_timeline.json",
+            "data": {
+              "count": "200",
+              "exclude_replies": "false"
+            },
+            "scheme": "https",
+            "host": "api.twitter.com"
+          },
+          "success": [
+            {
+              "{{#if Array.isArray($jason)}}": {
+                "type": "$render"
+              }
+            },
+            {
+              "{{#else}}": {
+                "type": "$oauth.unauth",
+                "options": {
+                  "host": "api.twitter.com",
+                  "version": "0"
+                },
+                "success": {
+                  "type": "$back"
+                }
+              }
+            }
+          ],
+          "error": {
+            "type": "$oauth.unauth",
+            "options": {
+              "host": "api.twitter.com",
+              "version": "0"
+            },
+            "success": {
+              "type": "$back"
+            }
+          }
+        }
+      },
+      "templates": {
+        "body": {
+          "style": {
+            "background": "#636363",
+            "color": "#ffffff",
+            "border": "#888888"
+          },
+          "nav": {
+            "style": {
+              "background": "#636363",
+              "status": "dark",
+              "color": "#ffffff"
+            },
+            "items": [
+              {
+                "type": "menu",
+                "text": "Logout",
+                "action": {
+                  "type": "$oauth.unauth",
+                  "options": {
+                    "version": "0",
+                    "host": "api.twitter.com"
+                  },
+                  "success": {
+                    "type": "$back"
+                  }
+                }
+              }
+            ]
+          },
+          "sections": [
+            {
+              "items": {
+                "{{#each $jason}}": {
+                  "type": "horizontal",
+                  "href": {
+                    "url": "{{text.replace(/.*(https:\\/\\/[/.a-zA-Z0-9]+).*/, '$1')}}",
+                    "view": "SafariView"
+                  },
+                  "style": {
+                    "color": "rgb(254,254,254)",
+                    "padding": "10",
+                    "spacing": "10",
+                    "background": "#636363"
+                  },
+                  "components": [
+                    {
+                      "type": "image",
+                      "url": "{{user.profile_image_url_https}}",
+                      "style": {
+                        "width": "20",
+                        "corner_radius": "3"
+                      }
+                    },
+                    {
+                      "type": "vertical",
+                      "components": [
+                        {
+                          "type": "label",
+                          "style": {
+                            "size": "12",
+                            "font": "HelveticaNeue-Bold",
+                            "color": "rgb(254,254,254)"
+                          },
+                          "text": "{{user.screen_name}}"
+                        },
+                        {
+                          "type": "label",
+                          "text": "{{text.replace(/https:\\/\\/[/.a-zA-Z0-9]+/g, '')}}",
+                          "style": {
+                            "size": "12",
+                            "font": "HelveticaNeue",
+                            "color": "rgb(254,254,254)"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
